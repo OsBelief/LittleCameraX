@@ -38,7 +38,7 @@ class CameraFragment : Fragment() {
         }
     }
 
-    private lateinit var viewFinder: TextureView
+    private lateinit var viewFinder: TextureView    // lateinit标识延迟初始化, 否则或者在定义时初始化, 或者在构造函数中初始化
 
     private fun startCamera() {
         val previewConfig = PreviewConfig.Builder().apply {
@@ -63,8 +63,8 @@ class CameraFragment : Fragment() {
                     startCamera()
                 }
             } else {
-                Toast.makeText(activity, "Permissions not granted by user.", Toast.LENGTH_SHORT).show();
-                activity?.finish()
+                Toast.makeText(activity, "Permissions not granted by user.", Toast.LENGTH_SHORT).show()
+                activity?.finish()  // activity是可空类型(Nullable Type), 使用时要加?, 如果activity为null, 则这行代码不会执行
             }
         }
     }
