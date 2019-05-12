@@ -4,12 +4,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.little.camerax.fragment.CameraFragment
 
-class MainActivity : AppCompatActivity() {
+class CameraXActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_camera)
 
-        supportFragmentManager.beginTransaction().add(R.id.fragment_container, CameraFragment()).commit()
+        var fragment = CameraFragment()
+        supportFragmentManager.beginTransaction().add(R.id.fragment_container, fragment).commit()
     }
 }
