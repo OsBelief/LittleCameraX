@@ -1,11 +1,13 @@
 package com.little.camerax.fragment
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.drawable.ColorDrawable
+import android.hardware.camera2.CameraManager
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -18,6 +20,7 @@ import android.view.*
 import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.camera.camera2.impl.compat.CameraManagerCompat
 import androidx.camera.core.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -25,11 +28,12 @@ import com.little.camerax.CameraXActivity
 import com.little.camerax.R
 import com.little.camerax.uitls.FileUtils
 import java.io.File
+import java.lang.Exception
 
 private const val REQUEST_CODE_PERMISSIONS = 10
 private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
-private const val TAG = "CameraX"
+private const val TAG = "LittleCameraX"
 
 private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
 private const val FILE_EXTENSION = ".jpg"
@@ -67,6 +71,7 @@ class CameraFragment : Fragment() {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private fun updateCameraUI() {
         container.findViewById<ConstraintLayout>(R.id.camera_ui_container)?.let {
             container.removeView(it)
@@ -93,20 +98,45 @@ class CameraFragment : Fragment() {
                 }
             }
         }
+        controls.findViewById<ImageButton>(R.id.camera_switch).setOnClickListener {
+            lensFacing = if (CameraX.LensFacing.FRONT == lensFacing) {
+                CameraX.LensFacing.BACK
+            } else {
+                CameraX.LensFacing.FRONT
+            }
+            try {
+                var cameraId = CameraX.getCameraWithLensFacing(lensFacing)
+                var cameraInfo = CameraX.getCameraInfo(cameraId)
+                Log.i(TAG, "CameraX cameraId is $cameraId, cameraInfo is $cameraInfo")
+                buildCameraUseCase()
+            } catch (e: Exception) {
+                Log.e(TAG, "", e)
+            }
+        }
     }
 
+    @SuppressLint("RestrictedApi")
     private fun buildCameraUseCase() {
+        CameraX.unbindAll()
+
         // 预览
         var metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }   // also当前对象作为参数, 返回当前对象
+        Log.i(TAG, "widthPixels is ${metrics.widthPixels}, heightPixels is ${metrics.heightPixels}")
         var screenAspectRatio = Rational(metrics.widthPixels, metrics.heightPixels)
 
         val previewConfig = PreviewConfig.Builder().apply {
+            setLensFacing(lensFacing)
             setTargetAspectRatio(screenAspectRatio) // 宽高比
             setTargetRotation(viewFinder.display.rotation)
         }.build()   // apply操作当前对象, 返回当前对象
 
         var preview = Preview(previewConfig)
         preview.setOnPreviewOutputUpdateListener {
+            Log.i(TAG, "onPreviewOutputUpdateListener---")
+            val parent = viewFinder.parent as ViewGroup
+            parent.removeView(viewFinder)
+            parent.addView(viewFinder, 0)
+
             viewFinder.surfaceTexture = it.surfaceTexture
             updateTransform()
         }
