@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Matrix
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Rational
-import android.util.Size
 import android.view.*
 import android.widget.Toast
 import androidx.camera.core.CameraX
@@ -41,10 +41,13 @@ class CameraFragment : Fragment() {
     private lateinit var viewFinder: TextureView    // lateinit标识延迟初始化, 否则或者在定义时初始化, 或者在构造函数中初始化
 
     private fun startCamera() {
+        var metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }   // also当前对象作为参数, 返回当前对象
+        var screenAspectRatio = Rational(metrics.widthPixels, metrics.heightPixels)
+
         val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(1, 1))
-            setTargetResolution(Size(640, 640))
-        }.build()
+            setTargetAspectRatio(screenAspectRatio)
+            setTargetRotation(viewFinder.display.rotation)
+        }.build()   // apply操作当前对象, 返回当前对象
 
         var preview = Preview(previewConfig)
         preview.setOnPreviewOutputUpdateListener {
