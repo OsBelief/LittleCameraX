@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.little.camerax.fragment.CameraFragment
+import com.little.camerax.uitls.LittleCoroutine
 import java.io.File
 
 class CameraXActivity : AppCompatActivity() {
@@ -14,6 +15,8 @@ class CameraXActivity : AppCompatActivity() {
 
         var fragment = CameraFragment() // Kotlin和Dart一样, 创建对象不使用"new"关键字
         supportFragmentManager.beginTransaction().add(R.id.fragment_container, fragment).commit()
+
+        LittleCoroutine.testCoroutine()
     }
 
     companion object {
